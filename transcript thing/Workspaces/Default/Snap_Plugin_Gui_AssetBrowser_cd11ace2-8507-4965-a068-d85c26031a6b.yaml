@@ -1,0 +1,8 @@
+CollapsedEntities:
+  type: stringset
+  value:
+    size: 2
+    values:
+      - Untitled TypeScript.ts
+      - VoiceML Module.voiceMLModule
+  options: 4

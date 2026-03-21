@@ -1,0 +1,47 @@
+- !<AssetImportMetadata/a6b409b2-cdee-4646-b198-14d4801a08f8>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 8b0685c7-56a5-4e73-af98-bed75bfcc2b7
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 8b0685c7-56a5-4e73-af98-bed75bfcc2b7
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 85683076-8cc1-4909-b175-00ba5ad63c57
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/85683076-8cc1-4909-b175-00ba5ad63c57>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: 6943ebbe-0adc-495d-a69f-b01000ab9c46
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    transcriptText: false
+    vmlModule: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - vmlModule: !<reference.VoiceMLModule> 00000000-0000-0000-0000-000000000000
+      transcriptText: !<reference.Text> 00000000-0000-0000-0000-000000000000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input Component.VoiceMLModule vmlModule
+    - // @input Component.Text transcriptText
