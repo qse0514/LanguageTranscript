@@ -61,31 +61,41 @@ let TranscriptionComponent = (() => {
             super();
             this.vmlModule = this.vmlModule;
             this.transcriptText = this.transcriptText;
+            this.internetModule = this.internetModule;
+            this.SUPABASE_URL = "https://akfpmfnnmhoatqslpvqt.supabase.co";
+            this.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFrZnBtZm5ubWhvYXRxc2xwdnF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMjQyMjQsImV4cCI6MjA4OTcwMDIyNH0.mS4BgmmGY0YQzN7WNqaEw4PofElpcvDzpi8uqleFxTM";
         }
         __initialize() {
             super.__initialize();
             this.vmlModule = this.vmlModule;
             this.transcriptText = this.transcriptText;
+            this.internetModule = this.internetModule;
+            this.SUPABASE_URL = "https://akfpmfnnmhoatqslpvqt.supabase.co";
+            this.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFrZnBtZm5ubWhvYXRxc2xwdnF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMjQyMjQsImV4cCI6MjA4OTcwMDIyNH0.mS4BgmmGY0YQzN7WNqaEw4PofElpcvDzpi8uqleFxTM";
         }
         onAwake() {
             print("Script started on Spectacles!");
-            this.vmlModule.onListeningUpdate.add((eventArgs) => {
-                const transcript = eventArgs.transcription;
-                if (transcript && transcript.length > 0) {
-                    this.transcriptText.text = transcript;
-                }
+            const pollEvent = this.createEvent("UpdateEvent");
+            let lastText = "";
+            let ticker = 0;
+            pollEvent.bind(() => {
+                ticker++;
+                if (ticker % 30 !== 0)
+                    return;
+                const req = RemoteServiceHttpRequest.create();
+                req.url = `${this.SUPABASE_URL}/rest/v1/transcript?select=text&limit=1`;
+                req.method = RemoteServiceHttpRequest.HttpRequestMethod.Get;
+                req.setHeader("apikey", this.SUPABASE_ANON_KEY);
+                req.setHeader("Authorization", `Bearer ${this.SUPABASE_ANON_KEY}`);
+                this.internetModule.performHttpRequest(req, (response) => {
+                    const data = JSON.parse(response.body);
+                    const text = data[0]?.text ?? "";
+                    if (text !== lastText) {
+                        lastText = text;
+                        this.transcriptText.text = text;
+                    }
+                });
             });
-            this.vmlModule.onListeningError.add((eventErrorArgs) => {
-                print('Error: ' + eventErrorArgs.error + ' desc: ' + eventErrorArgs.description);
-            });
-            // Delay startListening to let Spectacles fully initialize
-            const delayEvent = this.createEvent("DelayedCallbackEvent");
-            delayEvent.bind(() => {
-                print("Starting listening...");
-                const options = VoiceML.ListeningOptions.create();
-                this.vmlModule.startListening(options);
-            });
-            delayEvent.reset(1.0); // 1 second delay
         }
     };
     __setFunctionName(_classThis, "TranscriptionComponent");

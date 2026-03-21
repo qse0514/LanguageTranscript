@@ -14,6 +14,7 @@ function checkUndefined(property, showIfData) {
 }
 // @input Component.VoiceMLModule vmlModule
 // @input Component.Text transcriptText
+// @input Asset.InternetModule internetModule
 if (!global.BaseScriptComponent) {
     function BaseScriptComponent() {}
     global.BaseScriptComponent = BaseScriptComponent;
@@ -30,6 +31,7 @@ let awakeEvent = script.createEvent("OnAwakeEvent");
 awakeEvent.bind(() => {
     checkUndefined("vmlModule", []);
     checkUndefined("transcriptText", []);
+    checkUndefined("internetModule", []);
     if (script.onAwake) {
        script.onAwake();
     }
