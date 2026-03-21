@@ -54,7 +54,6 @@
   <div id="status">Tap to start</div>
   <button id="micBtn">🎤</button>
   <div id="transcript">Your speech will appear here...</div>
-
   <script>
     const SUPABASE_URL = 'https://akfpmfnnmhoatqslpvqt.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFrZnBtZm5ubWhvYXRxc2xwdnF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMjQyMjQsImV4cCI6MjA4OTcwMDIyNH0.mS4BgmmGY0YQzN7WNqaEw4PofElpcvDzpi8uqleFxTM';
@@ -85,7 +84,6 @@
         statusEl.textContent = '❌ Speech not supported on this browser';
         return;
       }
-
       recognition = new SpeechRecognition();
       recognition.continuous = true;
       recognition.interimResults = true;
@@ -97,12 +95,13 @@
           const t = event.results[i][0].transcript;
           if (event.results[i].isFinal) {
             fullText += t + ' ';
-            saveToSupabase(fullText.trim());
           } else {
             interim = t;
           }
         }
-        transcriptEl.textContent = fullText + interim;
+        const displayText = fullText + interim;
+        transcriptEl.textContent = displayText;
+        saveToSupabase(displayText.trim());
       };
 
       recognition.onerror = (e) => {
@@ -110,7 +109,7 @@
       };
 
       recognition.onend = () => {
-        if (listening) recognition.start(); // auto-restart
+        if (listening) recognition.start();
       };
 
       recognition.start();
@@ -129,6 +128,7 @@
         btn.textContent = '🎤';
         statusEl.textContent = 'Tap to start';
         if (recognition) recognition.stop();
+        fullText = '';
       }
     });
   </script>
