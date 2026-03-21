@@ -80,7 +80,7 @@ let TranscriptionComponent = (() => {
             let ticker = 0;
             pollEvent.bind(() => {
                 ticker++;
-                if (ticker % 30 !== 0)
+                if (ticker % 3 !== 0)
                     return;
                 const req = RemoteServiceHttpRequest.create();
                 req.url = `${this.SUPABASE_URL}/rest/v1/transcript?select=text&limit=1`;
