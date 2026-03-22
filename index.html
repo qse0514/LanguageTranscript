@@ -98,4 +98,46 @@
 
       recognition.onresult = (event) => {
         let interim = '';
-        for (let i = event.resultIndex; i < eve
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const t = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            fullText += t + ' ';
+          } else {
+            interim = t;
+          }
+        }
+        const displayText = fullText + interim;
+        transcriptEl.textContent = displayText;
+        saveToFirebase(displayText.trim());
+      };
+
+      recognition.onerror = (e) => {
+        statusEl.textContent = '❌ Error: ' + e.error;
+      };
+
+      recognition.onend = () => {
+        if (listening) recognition.start();
+      };
+
+      recognition.start();
+    }
+
+    btn.addEventListener('click', () => {
+      if (!listening) {
+        listening = true;
+        btn.classList.add('listening');
+        btn.textContent = '⏹';
+        statusEl.textContent = '🟢 Listening...';
+        startRecognition();
+      } else {
+        listening = false;
+        btn.classList.remove('listening');
+        btn.textContent = '🎤';
+        statusEl.textContent = 'Tap to start';
+        if (recognition) recognition.stop();
+        fullText = '';
+      }
+    });
+  </script>
+</body>
+</html>
