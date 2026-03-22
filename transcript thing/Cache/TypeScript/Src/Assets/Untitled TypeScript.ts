@@ -12,6 +12,8 @@ export class TranscriptionComponent extends BaseScriptComponent {
   private lastTimestamp: number = 0;
   private lastInterim: string = "";
   private lastFinal: string = "";
+  private fadeDelay: number = 0;
+  private readonly FADE_DELAY_FRAMES: number = 120; // ~3 seconds before fade starts
 
   onAwake() {
     print("Script started on Spectacles!");
@@ -19,7 +21,13 @@ export class TranscriptionComponent extends BaseScriptComponent {
     const updateEvent = this.createEvent("UpdateEvent");
     updateEvent.bind(() => {
       if (!this.isFading) return;
-      this.opacity -= 0.02; // slower fade
+
+      if (this.fadeDelay < this.FADE_DELAY_FRAMES) {
+        this.fadeDelay++;
+        return;
+      }
+
+      this.opacity -= 0.02;
       if (this.opacity < 0) this.opacity = 0;
 
       const c = this.transcriptText.textFill.color;
@@ -27,6 +35,7 @@ export class TranscriptionComponent extends BaseScriptComponent {
 
       if (this.opacity === 0) {
         this.isFading = false;
+        this.fadeDelay = 0;
         this.transcriptText.text = "";
       }
     });
@@ -56,6 +65,7 @@ export class TranscriptionComponent extends BaseScriptComponent {
               this.lastInterim = "";
               this.transcriptText.text = newFinal;
               this.opacity = 1.0;
+              this.fadeDelay = 0;
               const c = this.transcriptText.textFill.color;
               this.transcriptText.textFill.color = new vec4(c.r, c.g, c.b, 1.0);
               this.isFading = true;
@@ -64,6 +74,7 @@ export class TranscriptionComponent extends BaseScriptComponent {
               this.lastInterim = newInterim;
               this.lastFinal = "";
               this.isFading = false;
+              this.fadeDelay = 0;
               this.transcriptText.text = newInterim;
               this.opacity = 1.0;
               const c = this.transcriptText.textFill.color;

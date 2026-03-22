@@ -68,6 +68,8 @@ let TranscriptionComponent = (() => {
             this.lastTimestamp = 0;
             this.lastInterim = "";
             this.lastFinal = "";
+            this.fadeDelay = 0;
+            this.FADE_DELAY_FRAMES = 120; // ~3 seconds before fade starts
         }
         __initialize() {
             super.__initialize();
@@ -80,6 +82,8 @@ let TranscriptionComponent = (() => {
             this.lastTimestamp = 0;
             this.lastInterim = "";
             this.lastFinal = "";
+            this.fadeDelay = 0;
+            this.FADE_DELAY_FRAMES = 120; // ~3 seconds before fade starts
         }
         onAwake() {
             print("Script started on Spectacles!");
@@ -87,13 +91,18 @@ let TranscriptionComponent = (() => {
             updateEvent.bind(() => {
                 if (!this.isFading)
                     return;
-                this.opacity -= 0.02; // slower fade
+                if (this.fadeDelay < this.FADE_DELAY_FRAMES) {
+                    this.fadeDelay++;
+                    return;
+                }
+                this.opacity -= 0.02;
                 if (this.opacity < 0)
                     this.opacity = 0;
                 const c = this.transcriptText.textFill.color;
                 this.transcriptText.textFill.color = new vec4(c.r, c.g, c.b, this.opacity);
                 if (this.opacity === 0) {
                     this.isFading = false;
+                    this.fadeDelay = 0;
                     this.transcriptText.text = "";
                 }
             });
@@ -119,6 +128,7 @@ let TranscriptionComponent = (() => {
                                 this.lastInterim = "";
                                 this.transcriptText.text = newFinal;
                                 this.opacity = 1.0;
+                                this.fadeDelay = 0;
                                 const c = this.transcriptText.textFill.color;
                                 this.transcriptText.textFill.color = new vec4(c.r, c.g, c.b, 1.0);
                                 this.isFading = true;
@@ -127,6 +137,7 @@ let TranscriptionComponent = (() => {
                                 this.lastInterim = newInterim;
                                 this.lastFinal = "";
                                 this.isFading = false;
+                                this.fadeDelay = 0;
                                 this.transcriptText.text = newInterim;
                                 this.opacity = 1.0;
                                 const c = this.transcriptText.textFill.color;
