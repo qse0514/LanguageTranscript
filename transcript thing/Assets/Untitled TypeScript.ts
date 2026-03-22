@@ -19,7 +19,7 @@ export class TranscriptionComponent extends BaseScriptComponent {
     const updateEvent = this.createEvent("UpdateEvent");
     updateEvent.bind(() => {
       if (!this.isFading) return;
-      this.opacity -= 0.05;
+      this.opacity -= 0.02; // slower fade
       if (this.opacity < 0) this.opacity = 0;
 
       const c = this.transcriptText.textFill.color;
@@ -52,7 +52,6 @@ export class TranscriptionComponent extends BaseScriptComponent {
             this.lastTimestamp = newTimestamp;
 
             if (newFinal !== "" && newFinal !== this.lastFinal) {
-              // Long pause — show final then fade out
               this.lastFinal = newFinal;
               this.lastInterim = "";
               this.transcriptText.text = newFinal;
@@ -62,9 +61,8 @@ export class TranscriptionComponent extends BaseScriptComponent {
               this.isFading = true;
 
             } else if (newInterim !== this.lastInterim) {
-              // New interim — always clear first, then show fresh
               this.lastInterim = newInterim;
-              this.lastFinal = ""; // reset so old final doesn't interfere
+              this.lastFinal = "";
               this.isFading = false;
               this.transcriptText.text = newInterim;
               this.opacity = 1.0;
