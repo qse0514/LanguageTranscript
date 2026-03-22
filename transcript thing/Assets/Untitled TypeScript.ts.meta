@@ -28,7 +28,6 @@
   ScriptInputsHidden:
     internetModule: false
     transcriptText: false
-    vmlModule: false
   ScriptTypesHidden:
     {}
   ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
@@ -38,13 +37,11 @@
   Attachments:
     []
   DefaultScriptInputs:
-    - vmlModule: !<reference.VoiceMLModule> 00000000-0000-0000-0000-000000000000
-      transcriptText: !<reference.Text> 00000000-0000-0000-0000-000000000000
-      internetModule: !<reference.InternetModule> 00000000-0000-0000-0000-000000000000
+    - transcriptText: !<reference.Text> 00000000-0000-0000-0000-000000000000
+      internetModule: !<reference.InternetModule> 7ccb4efe-36ec-4ead-bfc8-82d9ea947fc8
   ScriptTypes:
     -
       {}
   InputLines:
-    - // @input Component.VoiceMLModule vmlModule
     - // @input Component.Text transcriptText
     - // @input Asset.InternetModule internetModule

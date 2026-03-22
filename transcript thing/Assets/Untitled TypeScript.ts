@@ -1,37 +1,80 @@
 @component
 export class TranscriptionComponent extends BaseScriptComponent {
 
-  @input('Component.VoiceMLModule') vmlModule: any;
   @input transcriptText: Text;
   @input internetModule: InternetModule;
 
-  private SUPABASE_URL: string = "https://akfpmfnnmhoatqslpvqt.supabase.co";
-  private SUPABASE_ANON_KEY: string = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFrZnBtZm5ubWhvYXRxc2xwdnF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMjQyMjQsImV4cCI6MjA4OTcwMDIyNH0.mS4BgmmGY0YQzN7WNqaEw4PofElpcvDzpi8uqleFxTM";
+  private FIREBASE_URL: string = "https://transcript-exp-default-rtdb.firebaseio.com/transcript.json";
+
+  private opacity: number = 1.0;
+  private isFading: boolean = false;
+  private isRequesting: boolean = false;
+  private lastTimestamp: number = 0;
+  private lastInterim: string = "";
+  private lastFinal: string = "";
 
   onAwake() {
-
     print("Script started on Spectacles!");
 
-    const pollEvent = this.createEvent("UpdateEvent");
-    let lastText = "";
-    let ticker = 0;
+    const updateEvent = this.createEvent("UpdateEvent");
+    updateEvent.bind(() => {
+      if (!this.isFading) return;
+      this.opacity -= 0.05;
+      if (this.opacity < 0) this.opacity = 0;
 
+      const c = this.transcriptText.textFill.color;
+      this.transcriptText.textFill.color = new vec4(c.r, c.g, c.b, this.opacity);
+
+      if (this.opacity === 0) {
+        this.isFading = false;
+        this.transcriptText.text = "";
+      }
+    });
+
+    const pollEvent = this.createEvent("UpdateEvent");
     pollEvent.bind(() => {
-      ticker++;
-      if (ticker % 3 !== 0) return;
+      if (this.isRequesting) return;
+      this.isRequesting = true;
 
       const req = RemoteServiceHttpRequest.create();
-      req.url = `${this.SUPABASE_URL}/rest/v1/transcript?select=text&limit=1`;
+      req.url = this.FIREBASE_URL;
       req.method = RemoteServiceHttpRequest.HttpRequestMethod.Get;
-      req.setHeader("apikey", this.SUPABASE_ANON_KEY);
-      req.setHeader("Authorization", `Bearer ${this.SUPABASE_ANON_KEY}`);
 
       this.internetModule.performHttpRequest(req, (response) => {
-        const data = JSON.parse(response.body);
-        const text = data[0]?.text ?? "";
-        if (text !== lastText) {
-          lastText = text;
-          this.transcriptText.text = text;
+        this.isRequesting = false;
+        try {
+          const data = JSON.parse(response.body);
+          const newFinal: string = data?.final ?? "";
+          const newInterim: string = data?.interim ?? "";
+          const newTimestamp: number = data?.timestamp ?? 0;
+
+          if (newTimestamp !== this.lastTimestamp) {
+            this.lastTimestamp = newTimestamp;
+
+            if (newFinal !== "" && newFinal !== this.lastFinal) {
+              // Long pause — show final then fade out
+              this.lastFinal = newFinal;
+              this.lastInterim = "";
+              this.transcriptText.text = newFinal;
+              this.opacity = 1.0;
+              const c = this.transcriptText.textFill.color;
+              this.transcriptText.textFill.color = new vec4(c.r, c.g, c.b, 1.0);
+              this.isFading = true;
+
+            } else if (newInterim !== this.lastInterim) {
+              // New interim — always clear first, then show fresh
+              this.lastInterim = newInterim;
+              this.lastFinal = ""; // reset so old final doesn't interfere
+              this.isFading = false;
+              this.transcriptText.text = newInterim;
+              this.opacity = 1.0;
+              const c = this.transcriptText.textFill.color;
+              this.transcriptText.textFill.color = new vec4(c.r, c.g, c.b, 1.0);
+            }
+          }
+
+        } catch(e) {
+          print("Parse error: " + e);
         }
       });
     });

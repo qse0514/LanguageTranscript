@@ -12,7 +12,6 @@ function checkUndefined(property, showIfData) {
         throw new Error("Input " + property + " was not provided for the object " + script.getSceneObject().name);
     }
 }
-// @input Component.VoiceMLModule vmlModule
 // @input Component.Text transcriptText
 // @input Asset.InternetModule internetModule
 if (!global.BaseScriptComponent) {
@@ -29,7 +28,6 @@ Object.setPrototypeOf(script, Module.TranscriptionComponent.prototype);
 script.__initialize();
 let awakeEvent = script.createEvent("OnAwakeEvent");
 awakeEvent.bind(() => {
-    checkUndefined("vmlModule", []);
     checkUndefined("transcriptText", []);
     checkUndefined("internetModule", []);
     if (script.onAwake) {
