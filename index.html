@@ -52,6 +52,7 @@
   <div id="transcript">Your speech will appear here...</div>
   <script>
     const FIREBASE_URL = 'https://transcript-exp-default-rtdb.firebaseio.com/transcript.json';
+    const PAUSE_THRESHOLD = 800; // ms — lower = shorter pause needed
 
     const btn = document.getElementById('micBtn');
     const statusEl = document.getElementById('status');
@@ -61,6 +62,7 @@
     let listening = false;
     let isSaving = false;
     let pendingSave = null;
+    let pauseTimer = null;
 
     async function saveToFirebase(payload) {
       if (isSaving) {
@@ -97,33 +99,43 @@
 
       recognition.onresult = (event) => {
         let interim = '';
-        let newFinal = '';
 
         for (let i = event.resultIndex; i < event.results.length; i++) {
           const t = event.results[i][0].transcript;
           if (event.results[i].isFinal) {
-            newFinal = t.trim();
+            // Browser detected final — send immediately
+            if (pauseTimer) clearTimeout(pauseTimer);
+            pauseTimer = null;
+            interim = '';
+            transcriptEl.textContent = t.trim();
+            saveToFirebase({
+              final: t.trim(),
+              interim: '',
+              timestamp: Date.now()
+            });
           } else {
             interim = t.trim();
           }
         }
 
-        if (newFinal) {
-          // A sentence just finished — send it as final, reset interim
-          transcriptEl.textContent = newFinal;
-          saveToFirebase({
-            final: newFinal,
-            interim: '',
-            timestamp: Date.now()
-          });
-        } else {
-          // Still speaking — send interim only
+        if (interim) {
           transcriptEl.textContent = interim;
           saveToFirebase({
             final: '',
             interim: interim,
             timestamp: Date.now()
           });
+
+          // Start pause timer
+          if (pauseTimer) clearTimeout(pauseTimer);
+          pauseTimer = setTimeout(() => {
+            saveToFirebase({
+              final: interim,
+              interim: '',
+              timestamp: Date.now()
+            });
+            pauseTimer = null;
+          }, PAUSE_THRESHOLD);
         }
       };
 
@@ -151,6 +163,7 @@
         btn.textContent = '🎤';
         statusEl.textContent = 'Tap to start';
         if (recognition) recognition.stop();
+        if (pauseTimer) clearTimeout(pauseTimer);
         saveToFirebase({ final: '', interim: '', timestamp: Date.now() });
       }
     });
